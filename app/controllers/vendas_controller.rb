@@ -22,16 +22,25 @@ class VendasController < ApplicationController
   # POST /vendas or /vendas.json
   def create
     @venda = Venda.new(venda_params)
-
-    respond_to do |format|
-      if @venda.save
-        format.html { redirect_to @venda, notice: "Venda was successfully created." }
-        format.json { render :show, status: :created, location: @venda }
-      else
-        format.html { render :new, status: :unprocessable_entity }
-        format.json { render json: @venda.errors, status: :unprocessable_entity }
-      end
+    puts @venda 
+    
+      item_do_estoque = Estoque.find_by_item(venda_params[:item])
+      
+    if item_do_estoque.destroy
+      @venda.save
+      Receitum.new(@venda).save
+      #render json: @compra
+     
     end
+    # respond_to do |format|
+    #   if @venda.save
+    #     format.html { redirect_to @venda, notice: "Venda was successfully created." }
+    #     format.json { render :show, status: :created, location: @venda }
+    #   else
+    #     format.html { render :new, status: :unprocessable_entity }
+    #     format.json { render json: @venda.errors, status: :unprocessable_entity }
+    #   end
+    # end
   end
 
   # PATCH/PUT /vendas/1 or /vendas/1.json
@@ -64,6 +73,6 @@ class VendasController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def venda_params
-      params.require(:venda).permit(:item, :valor)
+      params.require(:venda).permit(:id,:item, :valor)
     end
 end

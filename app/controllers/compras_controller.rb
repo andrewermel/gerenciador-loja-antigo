@@ -1,6 +1,7 @@
 class ComprasController < ApplicationController
   before_action :set_compra, only: %i[ show edit update destroy ]
 
+
   # GET /compras or /compras.json
   def index
     @compras = Compra.all
@@ -12,6 +13,7 @@ class ComprasController < ApplicationController
 
   # GET /compras/new
   def new
+ 
     @compra = Compra.new
   end
 
@@ -23,15 +25,14 @@ class ComprasController < ApplicationController
   def create
     @compra = Compra.new(compra_params)
 
-    respond_to do |format|
-      if @compra.save
-        format.html { redirect_to @compra, notice: "Compra was successfully created." }
-        format.json { render :show, status: :created, location: @compra }
-      else
-        format.html { render :new, status: :unprocessable_entity }
-        format.json { render json: @compra.errors, status: :unprocessable_entity }
-      end
+    if @compra.save
+      Estoque.new(compra_params).save
+    
+      #render json: @compra
+    else
+      render json: {erro: @compra.errors}
     end
+    
   end
 
   # PATCH/PUT /compras/1 or /compras/1.json
@@ -64,6 +65,10 @@ class ComprasController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def compra_params
+      params.require(:compra).permit(:item, :valor)
+    end
+
+    def parametros_filtrados
       params.require(:compra).permit(:item, :valor)
     end
 end
