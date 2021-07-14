@@ -22,7 +22,6 @@ class VendasController < ApplicationController
   # POST /vendas or /vendas.json
   def create
     @venda = Venda.new(venda_params)
-    puts @venda 
     
       item_do_estoque = Estoque.find_by_item(venda_params[:item])
       
