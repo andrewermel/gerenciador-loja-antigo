@@ -1,77 +1,28 @@
 class VendasController < ApplicationController
-  before_action :set_venda, only: %i[ show edit update destroy ]
-
-  # GET /vendas or /vendas.json
   def index
-    @vendas = Venda.all
   end
-
-  # GET /vendas/1 or /vendas/1.json
-  def show
-  end
-
-  # GET /vendas/new
-  def new
-    @venda = Venda.new
-  end
-
-  # GET /vendas/1/edit
-  def edit
-  end
-
-  # POST /vendas or /vendas.json
+  
   def create
-    @venda = Venda.new(venda_params)
-    
-      item_do_estoque = Estoque.find_by_item(venda_params[:item])
-      
-    if item_do_estoque.destroy
-      @venda.save
-      Receitum.new(@venda).save
-      #render json: @compra
-     
-    end
-    # respond_to do |format|
-    #   if @venda.save
-    #     format.html { redirect_to @venda, notice: "Venda was successfully created." }
-    #     format.json { render :show, status: :created, location: @venda }
-    #   else
-    #     format.html { render :new, status: :unprocessable_entity }
-    #     format.json { render json: @venda.errors, status: :unprocessable_entity }
-    #   end
-    # end
-  end
+    inventory = Inventory.find_by_product_id(params[:product_id])
+    inventory.quantity -= quantity_value
 
-  # PATCH/PUT /vendas/1 or /vendas/1.json
-  def update
-    respond_to do |format|
-      if @venda.update(venda_params)
-        format.html { redirect_to @venda, notice: "Venda was successfully updated." }
-        format.json { render :show, status: :ok, location: @venda }
-      else
-        format.html { render :edit, status: :unprocessable_entity }
-        format.json { render json: @venda.errors, status: :unprocessable_entity }
-      end
+    balance = Balance.new(
+      quantity: quantity_value,
+      product_id: params[:product_id],
+      user_id: params[:user_id],
+      price_per_unity: params[:price_per_unity]
+    )
+    if balance.save
+      inventory.save
+      return render json: { ok: true }
     end
-  end
 
-  # DELETE /vendas/1 or /vendas/1.json
-  def destroy
-    @venda.destroy
-    respond_to do |format|
-      format.html { redirect_to vendas_url, notice: "Venda was successfully destroyed." }
-      format.json { head :no_content }
-    end
+    render json: { ok: false }
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_venda
-      @venda = Venda.find(params[:id])
-    end
 
-    # Only allow a list of trusted parameters through.
-    def venda_params
-      params.require(:venda).permit(:id,:item, :valor)
-    end
+  def quantity_value
+    params[:quantity].to_i
+  end
 end

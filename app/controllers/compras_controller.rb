@@ -1,74 +1,28 @@
 class ComprasController < ApplicationController
-  before_action :set_compra, only: %i[ show edit update destroy ]
-
-
-  # GET /compras or /compras.json
   def index
-    @compras = Compra.all
   end
 
-  # GET /compras/1 or /compras/1.json
-  def show
-  end
-
-  # GET /compras/new
-  def new
- 
-    @compra = Compra.new
-  end
-
-  # GET /compras/1/edit
-  def edit
-  end
-
-  # POST /compras or /compras.json
   def create
-    @compra = Compra.new(compra_params)
+    inventory = Inventory.find_by_product_id(params[:product_id])
+    inventory.quantity += quantity_value
 
-    if @compra.save
-      Estoque.new(compra_params).save
-    
-      #render json: @compra
-    else
-      render json: {erro: @compra.errors}
+    balance = Balance.new(
+      quantity: quantity_value,
+      product_id: params[:product_id],
+      user_id: params[:user_id],
+      price_per_unity: - params[:price_per_unity].to_f
+    )
+    if balance.save
+      inventory.save
+      return render json: { ok: true }
     end
-    
-  end
 
-  # PATCH/PUT /compras/1 or /compras/1.json
-  def update
-    respond_to do |format|
-      if @compra.update(compra_params)
-        format.html { redirect_to @compra, notice: "Compra was successfully updated." }
-        format.json { render :show, status: :ok, location: @compra }
-      else
-        format.html { render :edit, status: :unprocessable_entity }
-        format.json { render json: @compra.errors, status: :unprocessable_entity }
-      end
-    end
-  end
-
-  # DELETE /compras/1 or /compras/1.json
-  def destroy
-    @compra.destroy
-    respond_to do |format|
-      format.html { redirect_to compras_url, notice: "Compra was successfully destroyed." }
-      format.json { head :no_content }
-    end
+    render json: { ok: false }
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_compra
-      @compra = Compra.find(params[:id])
-    end
 
-    # Only allow a list of trusted parameters through.
-    def compra_params
-      params.require(:compra).permit(:item, :valor)
-    end
-
-    def parametros_filtrados
-      params.require(:compra).permit(:item, :valor)
-    end
+  def quantity_value
+    params[:quantity].to_i
+  end
 end

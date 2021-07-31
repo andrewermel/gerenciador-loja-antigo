@@ -1,27 +1,18 @@
-<%= form_with(model: compra) do |form| %>
-  <% if compra.errors.any? %>
-    <div id="error_explanation">
-      <h2><%= pluralize(compra.errors.count, "error") %> prohibited this compra from being saved:</h2>
-
-      <ul>
-        <% compra.errors.each do |error| %>
-          <li><%= error.full_message %></li>
-        <% end %>
-      </ul>
-    </div>
-  <% end %>
-
-  <div class="field">
-    <%= form.label :item %>
-    <%= form.text_field :item %>
-  </div>
-
-  <div class="field">
-    <%= form.label :valor %>
-    <%= form.text_field :valor %>
-  </div>
-
-  <div class="actions">
-    <%= form.submit %>
-  </div>
-<% end %>
+<%= hidden_field_tag :authenticity_token, form_authenticity_token %>
+<div class="field">
+  <label>Quantidade</label>
+  <input name="quantity">
+</div>
+<div class="field">
+  <label>Produto</label>
+  <input name="product_id" type="number">
+</div>
+<div class="field">
+  <label>Valor</label>
+  <input name="price_per_unity">
+</div>
+<div class="field">
+  <label>Vendedor</label>
+  <input name="user_id" type="number">
+</div>
+<button>Salvar!</button>

@@ -1,0 +1,24 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Quantity:</strong>
+  <%= @balance.quantity %>
+</p>
+
+<p>
+  <strong>Product:</strong>
+  <%= @balance.product_id %>
+</p>
+
+<p>
+  <strong>User:</strong>
+  <%= @balance.user_id %>
+</p>
+
+<p>
+  <strong>Price per unity:</strong>
+  <%= @balance.price_per_unity %>
+</p>
+
+<%= link_to 'Edit', edit_balance_path(@balance) %> |
+<%= link_to 'Back', balances_path %>
