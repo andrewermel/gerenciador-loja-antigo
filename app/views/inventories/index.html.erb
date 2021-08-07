@@ -15,7 +15,7 @@
     <% @inventories.each do |inventory| %>
       <tr>
         <td><%= inventory.quantity %></td>
-        <td><%= inventory.product_id %></td>
+        <td><%= inventory.product.product_type.name %> - <%= inventory.product.name %></td>
         <td><%= link_to 'Show', inventory %></td>
         <td><%= link_to 'Edit', edit_inventory_path(inventory) %></td>
         <td><%= link_to 'Destroy', inventory, method: :delete, data: { confirm: 'Are you sure?' } %></td>

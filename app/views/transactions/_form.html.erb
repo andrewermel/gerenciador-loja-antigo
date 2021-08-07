@@ -12,8 +12,27 @@
   <% end %>
 
   <div class="field">
+    <%= form.label :user_id %>
+    <%= form.collection_select :user_id, User.all,:id,:name %>
+  </div>
+
+  <div class="field">
+    <label>Tipo de transação</label>
+
+    <select name="transaction_type" style="display: block">
+      <option value="buy">Compra</option>
+      <option value="sell">Venda</option>
+    </select>
+  </div>
+
+  <div class="field">
     <%= form.label :quantity %>
     <%= form.number_field :quantity %>
+  </div>
+
+  <div class="field">
+    <%= form.label :product_id %>
+    <%= form.collection_select :product_id, Product.all,:id,:name %>
   </div>
 
   <div class="field">
@@ -21,29 +40,7 @@
     <%= form.text_field :price_per_unity %>
   </div>
 
-  <div class="field">
-    <%= form.label :product_id %>
-    <%= form.text_field :product_id %>
-  </div>
-
-  <div class="field">
-    <%= form.label :user_id %>
-    <%= form.text_field :user_id %>
-  </div>
-
-  <div class="field">
-    <label>Tipo de transação</label>
-    <div style="display: flex">
-      <input type="radio" name="transaction_type" value="buy"/>
-      <label>Compra</label>
-      <input type="radio" name="transaction_type" value="sell"/>
-      <label>Venda</label>
-    </div>
-  </div>
-
   <div class="actions">
     <%= form.submit %>
   </div>
-
-
 <% end %>

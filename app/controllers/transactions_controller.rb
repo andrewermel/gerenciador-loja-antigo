@@ -23,7 +23,7 @@ class TransactionsController < ApplicationController
   def create
     @transaction = Transaction.new(transaction_params)
 
-    if buying?
+    if params[:transaction_type] == 'buy'
       @transaction.price_per_unity *= -1
     end
 
@@ -37,29 +37,6 @@ class TransactionsController < ApplicationController
         format.json { render json: @transaction.errors, status: :unprocessable_entity }
       end
     end
-  end
-
-  def buying?
-    params[:transaction_type] == 'buy'
-  end
-
-  def filter_transactions
-    return Transaction.all unless params[:transaction_type].present?
-    return Transaction.where('price_per_unity <= 0') if buying?
-    Transaction.where('price_per_unity > 0')
-  end
-
-  def update_inventory
-    @inventory = Inventory.find_by_product_id(@transaction.product_id)
-    if @inventory.nil?
-      @inventory = Inventory.new(product_id: @transaction.product_id, quantity: 0)
-    end
-    quantity_diff = @transaction.quantity
-    unless buying?
-      quantity_diff *= -1
-    end
-    @inventory.quantity += quantity_diff
-    @inventory.save
   end
 
   # PATCH/PUT /transactions/1 or /transactions/1.json
@@ -93,5 +70,25 @@ class TransactionsController < ApplicationController
     # Only allow a list of trusted parameters through.
     def transaction_params
       params.require(:transaction).permit(:quantity, :price_per_unity, :product_id, :user_id)
+    end
+
+    def update_inventory
+      inventory = Inventory.find_by_product_id(@transaction.product_id)
+      if inventory.nil?
+        inventory = Inventory.new(product_id: @transaction.product_id, quantity: 0)
+      end
+
+      if params[:transaction_type] == 'buy'
+        inventory.quantity += @transaction.quantity
+      else
+        inventory.quantity -= @transaction.quantity
+      end
+      inventory.save
+    end
+
+    def filter_transactions
+      return Transaction.all unless params[:transaction_type].present?
+      return Transaction.where('price_per_unity <= 0') if params[:transaction_type] == 'buy'
+      Transaction.where('price_per_unity > 0')
     end
 end
