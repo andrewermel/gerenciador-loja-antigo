@@ -4,6 +4,10 @@ class TransactionsController < ApplicationController
   # GET /transactions or /transactions.json
   def index
     @transactions = filter_transactions
+    @total = 0
+    @transactions.each do |transaction|
+      @total += transaction.quantity * transaction.price_per_unity
+    end
   end
 
   # GET /transactions/1 or /transactions/1.json
@@ -13,19 +17,21 @@ class TransactionsController < ApplicationController
   # GET /transactions/new
   def new
     @transaction = Transaction.new
+    @users = User.all
+    @products = Product.all
   end
 
   # GET /transactions/1/edit
   def edit
+    @users = User.all
+    @products = Product.all
   end
 
   # POST /transactions or /transactions.json
   def create
     @transaction = Transaction.new(transaction_params)
 
-    if params[:transaction_type] == 'buy'
-      @transaction.price_per_unity *= -1
-    end
+    @transaction.price_per_unity *= -1 if buying?
 
     respond_to do |format|
       if @transaction.save
@@ -62,33 +68,32 @@ class TransactionsController < ApplicationController
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_transaction
-      @transaction = Transaction.find(params[:id])
-    end
 
-    # Only allow a list of trusted parameters through.
-    def transaction_params
-      params.require(:transaction).permit(:quantity, :price_per_unity, :product_id, :user_id)
-    end
+  def set_transaction
+    @transaction = Transaction.find(params[:id])
+  end
 
-    def update_inventory
-      inventory = Inventory.find_by_product_id(@transaction.product_id)
-      if inventory.nil?
-        inventory = Inventory.new(product_id: @transaction.product_id, quantity: 0)
-      end
+  # Only allow a list of trusted parameters through.
+  def transaction_params
+    params.require(:transaction).permit(:quantity, :price_per_unity, :product_id, :user_id)
+  end
 
-      if params[:transaction_type] == 'buy'
-        inventory.quantity += @transaction.quantity
-      else
-        inventory.quantity -= @transaction.quantity
-      end
-      inventory.save
-    end
+  def update_inventory
+    product = @transaction.product
+    quantity_diff = @transaction.quantity
+    quantity_diff *= -1 unless buying?
+    product.quantity += quantity_diff
+    product.save
+  end
 
-    def filter_transactions
-      return Transaction.all unless params[:transaction_type].present?
-      return Transaction.where('price_per_unity <= 0') if params[:transaction_type] == 'buy'
-      Transaction.where('price_per_unity > 0')
-    end
+  def filter_transactions
+    return Transaction.where('created_at > ?', params[:since]) if params[:since].present?
+    return Transaction.all unless params[:transaction_type].present?
+    return Transaction.where('price_per_unity <= 0') if buying?
+    Transaction.where('price_per_unity > 0')
+  end
+
+  def buying?
+    params[:transaction_type] == 'buy'
+  end
 end

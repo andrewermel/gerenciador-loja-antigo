@@ -1,6 +1,6 @@
 Rails.application.routes.draw do
   resources :transactions
-  resources :inventories
+  resources :inventories, only: [:index, :show]
   resources :products
   resources :product_types
   resources :users
